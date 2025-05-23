@@ -1,12 +1,11 @@
+import { useRef, useState } from 'react';
 import downloadImg from '../resources/download.png';
 import SidePanel from './SidePanel';
 import HomeDropdown from './HomeDropdown';
 import ThreeColumnDropdown from './ThreeColumnDropdown';
-import TwoColumnDropDown from './TwoColumnDropDown';  // Import the TwoColumnDropdown
+import TwoColumnDropDown from './TwoColumnDropDown';
 import OneColumnDropdown from './OneColumnDropdown';
-import FourColumnDropDown from './FourColumnDropDown'; // Import the FourColumnDropdown
-
-import { useState } from 'react';
+import FourColumnDropDown from './FourColumnDropDown';
 
 import '../index.css';
 import {
@@ -31,25 +30,39 @@ function classNames(...classes) {
 export default function Navbar() {
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [activeLink, setActiveLink] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
+
+  const [showHomeDropdown, setShowHomeDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [showFeatureDropdown, setShowFeatureDropdown] = useState(false);  // Add state for FEATURE dropdown
+  const [showFeatureDropdown, setShowFeatureDropdown] = useState(false);
   const [showBlogDropdown, setShowBlogDropdown] = useState(false);
-  const [showPagesDropdown, setShowPagesDropdown] = useState(false);  // Add state for PAGES dropdown
+  const [showPagesDropdown, setShowPagesDropdown] = useState(false);
+
+  // Refs to hold timeouts for each menu
+  const timeouts = {
+    HOME: useRef(null),
+    SHOP: useRef(null),
+    FEATURE: useRef(null),
+    BLOG: useRef(null),
+    PAGES: useRef(null),
+  };
+
+  const handleMouseEnter = (menu, setShow) => {
+    clearTimeout(timeouts[menu].current);
+    setShow(true);
+  };
+
+  const handleMouseLeave = (menu, setShow) => {
+    timeouts[menu].current = setTimeout(() => setShow(false), 300);
+  };
 
   const handleLinkClick = (name) => {
     setActiveLink(name);
-    setShowDropdown(name === 'HOME');
-    setShowBlogDropdown(name === 'BLOG');
-    setShowFeatureDropdown(name === 'FEATURE');  // Show FEATURE dropdown when clicked
-    setShowPagesDropdown(name === 'PAGES');  // Show PAGES dropdown when clicked
   };
 
   return (
     <Disclosure as="nav" className="bg-orange-100">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
-          {/* Mobile menu button */}
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
             <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset">
               <span className="absolute -inset-0.5" />
@@ -59,127 +72,132 @@ export default function Navbar() {
             </DisclosureButton>
           </div>
 
-          {/* Logo + Menu */}
           <div className="flex flex-1 items-center justify-between sm:items-center sm:justify-start">
             <div className="flex items-center">
               <img src={downloadImg} alt="Your Company" className="h-16 w-auto" />
             </div>
 
-            {/* Navigation items */}
             <div className="hidden sm:flex space-x-8 ml-8">
-              {navigation.map((name) =>
-                name === 'SHOP' ? (
-                  <div
-                    key={name}
-                    className="relative"
-                    onMouseEnter={() => setShowShopDropdown(true)}
-                    onMouseLeave={() => setShowShopDropdown(false)}
-                  >
-                    <button
-                      onClick={() => handleLinkClick(name)}
-                      className={classNames(
-                        activeLink === name ? 'text-orange-500' : 'text-black font-bold',
-                        'flex items-center space-x-1 px-3 py-2 text-sm'
-                      )}
+              {navigation.map((name) => {
+                const isActive = activeLink === name;
+                const sharedProps = {
+                  onClick: () => handleLinkClick(name),
+                  className: classNames(
+                    isActive ? 'text-orange-500' : 'text-black font-bold',
+                    'flex items-center space-x-1 px-3 py-2 text-sm'
+                  )
+                };
+
+                if (name === 'SHOP') {
+                  return (
+                    <div
+                      key={name}
+                      className="relative"
+                      onMouseEnter={() => handleMouseEnter('SHOP', setShowShopDropdown)}
+                      onMouseLeave={() => handleMouseLeave('SHOP', setShowShopDropdown)}
                     >
-                      <span>{name}</span>
-                      <ChevronDownIcon className="w-4 h-4 ml-2" />
-                    </button>
-                    {showShopDropdown && (
-                      <div className="absolute left-0 z-50 mt-2">
-                        <ThreeColumnDropdown />
-                      </div>
-                    )}
-                  </div>
-                ) : name === 'BLOG' ? (
-                  <div
-                    key={name}
-                    className="relative"
-                    onMouseEnter={() => setShowBlogDropdown(true)}
-                    onMouseLeave={() => setShowBlogDropdown(false)}
-                  >
-                    <button
-                      onClick={() => handleLinkClick(name)}
-                      className={classNames(
-                        activeLink === name ? 'text-orange-500' : 'text-black font-bold',
-                        'flex items-center space-x-1 px-3 py-2 text-sm'
+                      <button {...sharedProps}>
+                        <span>{name}</span>
+                        <ChevronDownIcon className="w-4 h-4 ml-2" />
+                      </button>
+                      {showShopDropdown && (
+                        <div className="absolute left-0 z-50 mt-2">
+                          <ThreeColumnDropdown />
+                        </div>
                       )}
+                    </div>
+                  );
+                }
+
+                if (name === 'BLOG') {
+                  return (
+                    <div
+                      key={name}
+                      className="relative"
+                      onMouseEnter={() => handleMouseEnter('BLOG', setShowBlogDropdown)}
+                      onMouseLeave={() => handleMouseLeave('BLOG', setShowBlogDropdown)}
                     >
-                      <span>{name}</span>
-                      <ChevronDownIcon className="w-4 h-4 ml-2" />
-                    </button>
-                    {showBlogDropdown && (
-                      <div className="absolute left-0 z-50 mt-2">
-                        <TwoColumnDropDown />
-                      </div>
-                    )}
-                  </div>
-                ) : name === 'FEATURE' ? (  // Add logic for FEATURE dropdown
-                  <div
-                    key={name}
-                    className="relative"
-                    onMouseEnter={() => setShowFeatureDropdown(true)}  // Show FEATURE dropdown on hover
-                    onMouseLeave={() => setShowFeatureDropdown(false)}  // Hide FEATURE dropdown on mouse leave
-                  >
-                    <button
-                      onClick={() => handleLinkClick(name)}
-                      className={classNames(
-                        activeLink === name ? 'text-orange-500' : 'text-black font-bold',
-                        'flex items-center space-x-1 px-3 py-2 text-sm'
+                      <button {...sharedProps}>
+                        <span>{name}</span>
+                        <ChevronDownIcon className="w-4 h-4 ml-2" />
+                      </button>
+                      {showBlogDropdown && (
+                        <div className="absolute left-0 z-50 mt-2">
+                          <TwoColumnDropDown />
+                        </div>
                       )}
+                    </div>
+                  );
+                }
+
+                if (name === 'FEATURE') {
+                  return (
+                    <div
+                      key={name}
+                      className="relative"
+                      onMouseEnter={() => handleMouseEnter('FEATURE', setShowFeatureDropdown)}
+                      onMouseLeave={() => handleMouseLeave('FEATURE', setShowFeatureDropdown)}
                     >
-                      <span>{name}</span>
-                      <ChevronDownIcon className="w-4 h-4 ml-2" />
-                    </button>
-                    {showFeatureDropdown && (
-                      <div className="absolute left-0 z-50 mt-2">
-                        <OneColumnDropdown />  {/* Assuming OneColumnDropdown for FEATURE */}
-                      </div>
-                    )}
-                  </div>
-                ) : name === 'PAGES' ? (  // Add logic for PAGES dropdown
-                  <div
-                    key={name}
-                    className="relative"
-                    onMouseEnter={() => setShowPagesDropdown(true)}  // Show PAGES dropdown on hover
-                    onMouseLeave={() => setShowPagesDropdown(false)}  // Hide PAGES dropdown on mouse leave
-                  >
-                    <button
-                      onClick={() => handleLinkClick(name)}
-                      className={classNames(
-                        activeLink === name ? 'text-orange-500' : 'text-black font-bold',
-                        'flex items-center space-x-1 px-3 py-2 text-sm'
+                      <button {...sharedProps}>
+                        <span>{name}</span>
+                        <ChevronDownIcon className="w-4 h-4 ml-2" />
+                      </button>
+                      {showFeatureDropdown && (
+                        <div className="absolute left-0 z-50 mt-2">
+                          <OneColumnDropdown />
+                        </div>
                       )}
+                    </div>
+                  );
+                }
+
+                if (name === 'PAGES') {
+                  return (
+                    <div
+                      key={name}
+                      className="relative"
+                      onMouseEnter={() => handleMouseEnter('PAGES', setShowPagesDropdown)}
+                      onMouseLeave={() => handleMouseLeave('PAGES', setShowPagesDropdown)}
                     >
-                      <span>{name}</span>
-                      <ChevronDownIcon className="w-4 h-4 ml-2" />
-                    </button>
-                    {showPagesDropdown && (
-                      <div className="absolute left-0 z-50 mt-2">
-                        <FourColumnDropDown />  {/* FourColumnDropdown for PAGES */}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div key={name} className="relative">
-                    <button
-                      onClick={() => handleLinkClick(name)}
-                      className={classNames(
-                        activeLink === name ? 'text-orange-500' : 'text-black font-bold',
-                        'flex items-center space-x-1 px-3 py-2 text-sm'
+                      <button {...sharedProps}>
+                        <span>{name}</span>
+                        <ChevronDownIcon className="w-4 h-4 ml-2" />
+                      </button>
+                      {showPagesDropdown && (
+                        <div className="absolute left-0 z-50 mt-2">
+                          <FourColumnDropDown />
+                        </div>
                       )}
+                    </div>
+                  );
+                }
+
+                if (name === 'HOME') {
+                  return (
+                    <div
+                      key={name}
+                      className="relative"
+                      onMouseEnter={() => handleMouseEnter('HOME', setShowHomeDropdown)}
+                      onMouseLeave={() => handleMouseLeave('HOME', setShowHomeDropdown)}
                     >
-                      <span>{name}</span>
-                      <ChevronDownIcon className="w-4 h-4 ml-2" />
-                    </button>
-                    {name === 'HOME' && showDropdown && <HomeDropdown />}
-                  </div>
-                )
-              )}
+                      <button {...sharedProps}>
+                        <span>{name}</span>
+                        <ChevronDownIcon className="w-4 h-4 ml-2" />
+                      </button>
+                      {showHomeDropdown && (
+                        <div className="absolute left-0 z-50 mt-2">
+                          <HomeDropdown />
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return null;
+              })}
             </div>
           </div>
 
-          {/* Icons on the right */}
           <div className="flex items-center space-x-8 ml-auto pr-4">
             <button className="text-black-400 hover:text-orange-500">
               <HeartIcon className="size-6" />
@@ -198,7 +216,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu panel */}
       <DisclosurePanel className="sm:hidden">
         <div className="space-y-1 px-2 pt-2 pb-3">
           {navigation.map((name) => (
