@@ -1,9 +1,11 @@
 import './index.css' // or wherever your Tailwind styles live
 import Example from './Navbar/Navbar';
 import Banner from './Herosection/Banner';
-// import Cards from './Herosection/cards';
 import Maincards from './Herosection/maincards';
-import Cardstwo from './Herosection/cardsTwo';
+import CardGrid from './Herosection/CardGrid';
+import CarouselLayout from './Herosection/CarouselLayout';
+import ImageStrip from './Herosection/ImageStrip';
+import ThreeCardImageGrid from './Herosection/ThreeCardImageGrid';
 // git 
 function App() {
   return (
@@ -11,8 +13,11 @@ function App() {
     <Example/>
     <Banner/>
     <Maincards/>
-    <Cardstwo/> 
-    {/* <Cards/> */}
+    <CardGrid/> 
+    <CarouselLayout/> 
+    <ImageStrip/> 
+    <ThreeCardImageGrid/> 
+   
 
    </div>
   );
